@@ -13,6 +13,8 @@ from homeassistant.const import (
     CONF_NAME, CONF_SWITCHES, EVENT_HOMEASSISTANT_STOP)
 import homeassistant.helpers.config_validation as cv
 
+from threading import Lock
+
 REQUIREMENTS = ['rpi-rf==0.9.6']
 
 _LOGGER = logging.getLogger(__name__)
@@ -43,6 +45,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_SWITCHES): vol.Schema({cv.string: SWITCH_SCHEMA}),
 })
 
+_lock = Lock()
 
 # pylint: disable=unused-argument, import-error
 def setup_platform(hass, config, add_devices, discovery_info=None):
@@ -110,8 +113,10 @@ class RPiRFSwitch(SwitchDevice):
     def _send_code(self, code_list, protocol, pulselength):
         """Send the code(s) with a specified pulselength."""
         _LOGGER.info("Sending code(s): %s", code_list)
-        for code in code_list:
-            self._rfdevice.tx_code(code, protocol, pulselength)
+        _lock.acquire()
+            for code in code_list:
+                self._rfdevice.tx_code(code, protocol, pulselength)
+        _lock.release()
         return True
 
     def turn_on(self):
