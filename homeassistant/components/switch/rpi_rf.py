@@ -114,8 +114,8 @@ class RPiRFSwitch(SwitchDevice):
         """Send the code(s) with a specified pulselength."""
         _LOGGER.info("Sending code(s): %s", code_list)
         _lock.acquire()
-            for code in code_list:
-                self._rfdevice.tx_code(code, protocol, pulselength)
+        for code in code_list:
+            self._rfdevice.tx_code(code, protocol, pulselength)
         _lock.release()
         return True
 
